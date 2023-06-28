@@ -36,7 +36,7 @@ class Images extends Model implements IModel {
       },
       {
         name: "createdDate",
-        type: MYSQL_CONSTANTS.TYPE.TIMESTAMP,
+        type: MYSQL_CONSTANTS.TYPE.BIGINT,
       },
     ];
 

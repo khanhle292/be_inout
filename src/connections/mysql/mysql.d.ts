@@ -16,6 +16,7 @@ export interface ColumnDefinition {
 
 export type ITypeMysql =
   | "INT"
+  | "BIGINT"
   | "TEXT"
   | "DATE"
   | "FLOAT"

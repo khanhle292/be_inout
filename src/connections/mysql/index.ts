@@ -16,9 +16,11 @@ class Mysql {
       try {
         const sql = `SELECT * FROM ${tableName}`;
 
-        this.connection.query(sql, (error: any | null, results: any[]) => {
+        this.connection.query(sql, (error, results: any[]) => {
           if (error) {
-            console.error("Error fetching data:", error);
+            console.error("Error fetching data:", error.message);
+            reject([]);
+            return;
           } else {
             console.log("Data retrieved successfully:");
             resolve(results);
@@ -26,8 +28,8 @@ class Mysql {
 
           this.connection.end(); // Close the MySQL connection
         });
-      } catch (error) {
-        console.log("[MYSQL]");
+      } catch (error: any) {
+        console.log("[MYSQL]", error?.message);
         resolve([]);
       }
     });
@@ -49,13 +51,16 @@ class Mysql {
 
       this.connection.connect((error) => {
         if (error) {
-          console.error("Error connecting to MySQL database:", error);
+          console.error("Error connecting to MySQL database:", error.message);
+          reject(error.message);
+          return;
         } else {
           this.connection.query(sql, (error, results) => {
             this.connection.end();
             if (error) {
-              reject(error);
-              resolve(null);
+              console.error("Error query to MySQL database:", error.message);
+              reject(error.message);
+              return;
             }
             resolve(results);
           });
@@ -108,6 +113,7 @@ class Mysql {
         }
       });
 
+      const sqlDrop = `DROP TABLE IF EXISTS ${tableName};`;
       const sql = `CREATE TABLE IF NOT EXISTS ${tableName} (${columnDefinitions})`;
 
       console.log("[MYSQL] Create Table: ", sql);
@@ -117,17 +123,50 @@ class Mysql {
           console.error("Error connecting to MySQL database:", error);
         } else {
           console.log("Connected to MySQL database!");
-          this.connection?.query(sql, (error: any | null) => {
-            this.connection?.end(); // Close the MySQL connection
+          this.connection?.query(sqlDrop, (error) => {
             if (error) {
-              console.error("Error creating table:", error);
+              console.error("Error dropping table:", error.message);
               resolve(false);
             } else {
-              console.log("Table created successfully!");
-              resolve(true);
+              this.connection?.query(sql, (error) => {
+                this.connection?.end(); // Close the MySQL connection
+                if (error) {
+                  console.error("Error creating table:", error.message);
+                  resolve(false);
+                } else {
+                  console.log("Table created successfully!");
+                  resolve(true);
+                }
+              });
             }
           });
         }
+      });
+    });
+  }
+
+  store(tableName: string, data: any) {
+    return new Promise((resolve, reject) => {
+      this.connection.connect((error) => {
+        if (error) {
+          console.error("Error connecting to MySQL database:", error.message);
+          resolve(false);
+          return;
+        }
+
+        const sql = `INSERT INTO ${tableName} SET ?`;
+
+        this.connection.query(sql, data, (error, results) => {
+          this.connection.end();
+
+          if (error) {
+            console.error("Error store to MySQL database:", error.message);
+            resolve(false);
+            return;
+          }
+
+          resolve(true);
+        });
       });
     });
   }
@@ -137,12 +176,12 @@ class Mysql {
 
     this.connection.connect((error) => {
       if (error) {
-        console.error("Error connecting to MySQL database:", error);
+        console.error("Error connecting to MySQL database:", error.message);
       } else {
         console.log("Connected to MySQL database!");
-        this.connection.query(sql, (error: any | null) => {
+        this.connection.query(sql, (error) => {
           if (error) {
-            console.error("Error dropping table:", error);
+            console.error("Error dropping table:", error.message);
           } else {
             console.log("Table dropped successfully!");
           }

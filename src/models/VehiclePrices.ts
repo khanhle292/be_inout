@@ -25,11 +25,11 @@ class VehiclePrices extends Model implements IModel {
       },
       {
         name: "startDateTime",
-        type: MYSQL_CONSTANTS.TYPE.TIMESTAMP,
+        type: MYSQL_CONSTANTS.TYPE.BIGINT,
       },
       {
         name: "endDateTime",
-        type: MYSQL_CONSTANTS.TYPE.TIMESTAMP,
+        type: MYSQL_CONSTANTS.TYPE.BIGINT,
       },
       {
         name: "fixedPrice",

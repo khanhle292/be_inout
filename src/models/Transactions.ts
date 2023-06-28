@@ -25,11 +25,11 @@ class Transactions extends Model implements IModel {
       },
       {
         name: "entryTime",
-        type: MYSQL_CONSTANTS.TYPE.TIMESTAMP,
+        type: MYSQL_CONSTANTS.TYPE.BIGINT,
       },
       {
         name: "exitTime",
-        type: MYSQL_CONSTANTS.TYPE.TIMESTAMP,
+        type: MYSQL_CONSTANTS.TYPE.BIGINT,
       },
       {
         name: "status",

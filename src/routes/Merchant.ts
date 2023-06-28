@@ -9,6 +9,7 @@ router.use(verifyLoginToken);
 
 router.route("/").get(Merchant.index as any);
 router.route("/vehicles").get(Item.index as any);
+router.route("/checkin").post(Item.checkIn as any);
 //   .post(Merchant.store as any);
 
 export default router;

@@ -7,6 +7,7 @@ interface IMysqlConstant {
 const MYSQL_CONSTANTS: IMysqlConstant = {
   TYPE: {
     INT: "INT",
+    BIGINT: "BIGINT",
     TEXT: "TEXT",
     DATE: "DATE",
     FLOAT: "FLOAT",

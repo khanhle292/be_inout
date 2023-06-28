@@ -4,6 +4,7 @@ import MYSQL_CONSTANTS from "./../connections/mysql/constants";
 
 import type { IModel } from "./interfaces/Model";
 import type { ColumnDefinition } from "../connections/mysql/mysql";
+import type { IItemStatus } from "@/types/Item";
 
 class Items extends Model implements IModel {
   private name: string = "Items";
@@ -30,11 +31,11 @@ class Items extends Model implements IModel {
       },
       {
         name: "entryTime",
-        type: MYSQL_CONSTANTS.TYPE.TIMESTAMP,
+        type: MYSQL_CONSTANTS.TYPE.BIGINT,
       },
       {
         name: "exitTime",
-        type: MYSQL_CONSTANTS.TYPE.TIMESTAMP,
+        type: MYSQL_CONSTANTS.TYPE.BIGINT,
       },
       {
         name: "status",
@@ -53,14 +54,35 @@ class Items extends Model implements IModel {
     await this.createTable(this.name, column);
   }
 
-  getAll(name: string): Promise<any[]> {
-    const list = new Mysql().queryWithCondition({
+  async getAll(name: string): Promise<any[]> {
+    const list = await new Mysql().queryWithCondition({
       field: "merchantId",
       condition: "=",
       value: name,
       table: "Items",
     });
     return list;
+  }
+
+  async store({
+    merchantId,
+    entryTime,
+    agentId,
+    status,
+  }: {
+    merchantId: number;
+    entryTime: number;
+    agentId: string;
+    status: IItemStatus;
+  }) {
+    const result = await new Mysql().store(this.name, {
+      merchantId,
+      entryTime,
+      agentId,
+      status,
+    });
+
+    return result;
   }
 }
 
