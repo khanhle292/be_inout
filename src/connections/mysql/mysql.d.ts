@@ -29,7 +29,7 @@ export type ITypeMysql =
   | "DATETIME"
   | "TIMESTAMP";
 
-export type ICondition =
+export type IOperation =
   | "="
   | ">"
   | "<"

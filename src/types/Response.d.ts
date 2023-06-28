@@ -1,5 +1,5 @@
 export interface IMerchantInfo {
-  merchantId: number;
+  id: number;
   merchantAgentId: number;
   merchantName: string;
   merchantUsername: string;
@@ -7,3 +7,5 @@ export interface IMerchantInfo {
   merchantAddress: string;
   merchantConfig: string; //object string
 }
+
+export interface IErrorCode {}

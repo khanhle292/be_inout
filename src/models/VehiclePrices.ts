@@ -10,7 +10,7 @@ class VehiclePrices extends Model implements IModel {
   async migrate() {
     const column: ColumnDefinition[] = [
       {
-        name: "vehiclePriceId",
+        name: "id",
         type: MYSQL_CONSTANTS.TYPE.INT,
         unique: true,
         autoIncrement: true,
@@ -21,7 +21,7 @@ class VehiclePrices extends Model implements IModel {
       {
         name: "vehicleTypeId",
         type: MYSQL_CONSTANTS.TYPE.INT,
-        foreignKey: { table: "VehicleTypes", column: "vehicleTypeId" },
+        foreignKey: { table: "VehicleTypes", column: "id" },
       },
       {
         name: "startDateTime",

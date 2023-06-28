@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
+import Mysql from "./../connections/mysql/index";
 
 const privateKey: string =
   "235243e4280497f7438ab491b7cce6ec2be780885b15f5b743de837bcc077dcc";
@@ -38,10 +39,38 @@ export const verifyLoginToken = (
     req.headers.authorization.split(" ")[0] === "Bearer"
   ) {
     const token = req.headers.authorization.split(" ")[1];
-    const verify = decodeLoginJWT(token);
+    const verify: any = decodeLoginJWT(token);
     if (verify) {
-      req.body.jwtTokenData = verify;
-      next();
+      const { id } = verify;
+      if (id) {
+        new Mysql()
+          .queryWithCondition({
+            field: "id",
+            operator: "=",
+            value: id,
+            table: "Merchants",
+          })
+          .then((value) => {
+            if (Array.isArray(value) && value.length > 0) {
+              const temp = value[0];
+              if (token === temp.token) {
+                req.body.jwtTokenData = verify;
+                next();
+              } else {
+                res.status(401).send({
+                  status: false,
+                  message: "You are not authorized to make this request",
+                });
+              }
+            }
+          })
+          .catch((error) => {
+            res.status(401).send({
+              status: false,
+              message: "You are not authorized to make this request",
+            });
+          });
+      }
     } else {
       res.status(401).send({
         status: false,

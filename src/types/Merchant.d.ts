@@ -1,5 +1,5 @@
 export interface IMerchant {
-  merchantId: number;
+  id: number;
   merchantName: string;
   merchantConfig: string;
   merchantAddress: string;

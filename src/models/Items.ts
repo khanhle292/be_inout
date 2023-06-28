@@ -4,7 +4,7 @@ import MYSQL_CONSTANTS from "./../connections/mysql/constants";
 
 import type { IModel } from "./interfaces/Model";
 import type { ColumnDefinition } from "../connections/mysql/mysql";
-import type { IItemStatus } from "@/types/Item";
+import type { IItem, IItemStatus } from "./../types/Item";
 
 class Items extends Model implements IModel {
   private name: string = "Items";
@@ -12,7 +12,7 @@ class Items extends Model implements IModel {
   async migrate() {
     const column: ColumnDefinition[] = [
       {
-        name: "itemId",
+        name: "id",
         type: MYSQL_CONSTANTS.TYPE.INT,
         unique: true,
         autoIncrement: true,
@@ -23,11 +23,11 @@ class Items extends Model implements IModel {
       {
         name: "merchantId",
         type: MYSQL_CONSTANTS.TYPE.INT,
-        foreignKey: { table: "Merchants", column: "merchantId" },
+        foreignKey: { table: "Merchants", column: "id" },
       },
       {
-        name: "agentId",
-        type: MYSQL_CONSTANTS.TYPE.VARCHAR100,
+        name: "secretKey",
+        type: MYSQL_CONSTANTS.TYPE.TEXT,
       },
       {
         name: "entryTime",
@@ -55,32 +55,56 @@ class Items extends Model implements IModel {
   }
 
   async getAll(name: string): Promise<any[]> {
-    const list = await new Mysql().queryWithCondition({
-      field: "merchantId",
-      condition: "=",
-      value: name,
-      table: "Items",
-    });
+    const array = [
+      {
+        field: "merchantId",
+        operator: "=",
+        value: name,
+      },
+      {
+        field: "status",
+        operator: "=",
+        value: "CHECKED_IN",
+      },
+    ];
+    const list = await new Mysql().queryWithConditions(array as any, "Items");
     return list;
   }
 
-  async store({
-    merchantId,
-    entryTime,
-    agentId,
-    status,
-  }: {
-    merchantId: number;
-    entryTime: number;
-    agentId: string;
-    status: IItemStatus;
-  }) {
-    const result = await new Mysql().store(this.name, {
+  async getAllDetail(id: string): Promise<any[]> {
+    const sql = `SELECT * 
+    FROM Items 
+    JOIN Vehicles ON Vehicles.id = Items.componentId
+    JOIN VehiclePrices ON VehiclePrices.id = Vehicles.vehiclePriceId
+    JOIN VehicleTypes ON VehicleTypes.id = VehiclePrices.vehicleTypeId
+    WHERE Items.merchantId = ${id} AND Items.status = 'CHECKED_IN'`;
+    const list: any = await new Mysql().rawQuery(sql);
+    return list;
+  }
+
+  async store(
+    {
       merchantId,
       entryTime,
-      agentId,
-      status,
-    });
+      secretKey,
+      status = "CHECKED_IN",
+      componentId,
+      componentType,
+    }: IItem,
+    getNew = false
+  ) {
+    const result = await new Mysql().store(
+      this.name,
+      {
+        componentType,
+        componentId,
+        merchantId,
+        entryTime,
+        secretKey,
+        status,
+      },
+      getNew
+    );
 
     return result;
   }

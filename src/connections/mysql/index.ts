@@ -1,4 +1,4 @@
-import type { ColumnDefinition, ICondition } from "./mysql";
+import type { ColumnDefinition, IOperation } from "./mysql";
 import mysql, { Connection } from "mysql2";
 
 class Mysql {
@@ -35,19 +35,42 @@ class Mysql {
     });
   }
 
+  rawQuery(query: string) {
+    return new Promise((resolve, reject) => {
+      this.connection.connect((error) => {
+        if (error) {
+          console.error("Error connecting to MySQL database:", error.message);
+          reject(error.message);
+          return;
+        } else {
+          this.connection.query(query, (error, results) => {
+            this.connection.end();
+            if (error) {
+              console.error("Error query to MySQL database:", error.message);
+              reject(error.message);
+              return;
+            }
+
+            resolve(results);
+          });
+        }
+      });
+    });
+  }
+
   queryWithCondition({
     field,
-    condition,
+    operator,
     value,
     table,
   }: {
     field: string;
-    condition: ICondition;
+    operator: IOperation;
     value: string;
     table: string;
   }): Promise<any | null> {
     return new Promise((resolve, reject) => {
-      const sql = `SELECT * FROM ${table} WHERE ${field} ${condition} "${value}"`;
+      const sql = `SELECT * FROM ${table} WHERE ${field} ${operator} "${value}"`;
 
       this.connection.connect((error) => {
         if (error) {
@@ -59,6 +82,47 @@ class Mysql {
             this.connection.end();
             if (error) {
               console.error("Error query to MySQL database:", error.message);
+              reject(error.message);
+              return;
+            }
+
+            resolve(results);
+          });
+        }
+      });
+    });
+  }
+
+  queryWithConditions(
+    conditions: Array<{
+      field: string;
+      operator: IOperation;
+      value: string;
+    }>,
+    table: string
+  ): Promise<any | null> {
+    return new Promise((resolve, reject) => {
+      let whereClause = "";
+      const conditionStrings = conditions.map((condition) => {
+        return `${condition.field} ${condition.operator} "${condition.value}"`;
+      });
+      if (conditionStrings.length > 0) {
+        whereClause = `WHERE ${conditionStrings.join(" AND ")}`;
+      }
+
+      const sql = `SELECT * FROM ${table} ${whereClause}`;
+
+      console.log("@@", sql);
+      this.connection.connect((error) => {
+        if (error) {
+          console.error("Error connecting to MySQL database:", error.message);
+          reject(error.message);
+          return;
+        } else {
+          this.connection.query(sql, (error, results) => {
+            this.connection.end();
+            if (error) {
+              console.error("Error querying MySQL database:", error.message);
               reject(error.message);
               return;
             }
@@ -116,8 +180,6 @@ class Mysql {
       const sqlDrop = `DROP TABLE IF EXISTS ${tableName};`;
       const sql = `CREATE TABLE IF NOT EXISTS ${tableName} (${columnDefinitions})`;
 
-      console.log("[MYSQL] Create Table: ", sql);
-
       this.connection.connect((error) => {
         if (error) {
           console.error("Error connecting to MySQL database:", error);
@@ -145,8 +207,52 @@ class Mysql {
     });
   }
 
-  store(tableName: string, data: any) {
+  getLatestRecord(tableName: string) {
+    return new Promise<any>((resolve) => {
+      const sql = `SELECT * FROM ${tableName} ORDER BY id DESC LIMIT 1`;
+      this.connection.connect((error) => {
+        if (error) {
+          console.error("Error connecting to MySQL database:", error.message);
+          resolve(false);
+          return;
+        }
+
+        this.connection.query(sql, (error, results) => {
+          if (error) {
+            console.error("Error store to MySQL database:", error.message);
+            resolve(false);
+            return;
+          }
+
+          if (Array.isArray(results) && results?.length > 0) {
+            resolve(results[0]);
+          }
+          resolve(false);
+          this.connection.end();
+        });
+      });
+    });
+  }
+
+  updateRecordById(id: number, data: any, table: string): Promise<boolean> {
     return new Promise((resolve, reject) => {
+      const updateSql = `UPDATE ${table} SET ? WHERE id = ?`;
+
+      this.connection.query(updateSql, [data, id], (error, results) => {
+        if (error) {
+          console.error("Error updating record:", error);
+          reject(error);
+          return;
+        }
+
+        console.log("Record updated successfully!");
+        resolve(true);
+      });
+    });
+  }
+
+  store(tableName: string, data: any, getNew: boolean = false) {
+    return new Promise(async (resolve) => {
       this.connection.connect((error) => {
         if (error) {
           console.error("Error connecting to MySQL database:", error.message);
@@ -156,16 +262,23 @@ class Mysql {
 
         const sql = `INSERT INTO ${tableName} SET ?`;
 
-        this.connection.query(sql, data, (error, results) => {
-          this.connection.end();
-
+        this.connection.query(sql, data, async (error, results) => {
           if (error) {
             console.error("Error store to MySQL database:", error.message);
             resolve(false);
             return;
           }
 
+          if (getNew) {
+            const data = await this.getLatestRecord(tableName);
+            if (data) {
+              resolve(data);
+              return;
+            }
+          }
+
           resolve(true);
+          this.connection.end();
         });
       });
     });

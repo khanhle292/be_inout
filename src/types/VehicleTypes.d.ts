@@ -1,4 +1,4 @@
 export interface IVehicleTypes {
-  typeId: string;
+  id: string;
   typeName: string;
 }

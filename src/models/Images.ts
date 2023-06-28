@@ -1,4 +1,5 @@
 import Model from "./Model";
+import Mysql from "./../connections/mysql";
 import MYSQL_CONSTANTS from "./../connections/mysql/constants";
 
 import type { IModel } from "./interfaces/Model";
@@ -10,7 +11,7 @@ class Images extends Model implements IModel {
   async migrate() {
     const column: ColumnDefinition[] = [
       {
-        name: "imageId",
+        name: "id",
         type: MYSQL_CONSTANTS.TYPE.INT,
         unique: true,
         autoIncrement: true,
@@ -31,16 +32,27 @@ class Images extends Model implements IModel {
         type: MYSQL_CONSTANTS.TYPE.TEXT,
       },
       {
-        name: "description",
-        type: MYSQL_CONSTANTS.TYPE.TEXT,
-      },
-      {
         name: "createdDate",
         type: MYSQL_CONSTANTS.TYPE.BIGINT,
       },
     ];
 
     await this.createTable(this.name, column);
+  }
+
+  async store({
+    url,
+    createdDate = Date.now(),
+  }: {
+    url: string;
+    createdDate: number;
+  }) {
+    const result = await new Mysql().store(this.name, {
+      url,
+      createdDate,
+    });
+
+    return result;
   }
 }
 

@@ -3,7 +3,6 @@ import MYSQL_CONSTANTS from "./../connections/mysql/constants";
 
 import type { IModel } from "./interfaces/Model";
 import type { ColumnDefinition } from "../connections/mysql/mysql";
-import Mysql from "./../connections/mysql";
 
 class VehicleTypes extends Model implements IModel {
   private name: string = "VehicleTypes";
@@ -11,7 +10,7 @@ class VehicleTypes extends Model implements IModel {
   async migrate() {
     const column: ColumnDefinition[] = [
       {
-        name: "vehicleTypeId",
+        name: "id",
         type: MYSQL_CONSTANTS.TYPE.INT,
         unique: true,
         autoIncrement: true,

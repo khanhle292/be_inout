@@ -13,13 +13,17 @@ class Merchants extends Model implements IModel {
   async migrate() {
     const column: ColumnDefinition[] = [
       {
-        name: "merchantId",
+        name: "id",
         type: MYSQL_CONSTANTS.TYPE.INT,
         unique: true,
         autoIncrement: true,
         notNull: true,
         primary: true,
         unsigned: true,
+      },
+      {
+        name: "token",
+        type: "LONGTEXT" as any,
       },
       {
         name: "merchantUsername",
@@ -55,7 +59,7 @@ class Merchants extends Model implements IModel {
         new Mysql()
           .queryWithCondition({
             field: "merchantUsername",
-            condition: "=",
+            operator: "=",
             value: username,
             table: this.name,
           })

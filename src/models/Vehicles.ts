@@ -4,6 +4,7 @@ import MYSQL_CONSTANTS from "./../connections/mysql/constants";
 import type { IModel } from "./interfaces/Model";
 import type { ColumnDefinition } from "../connections/mysql/mysql";
 import Mysql from "./../connections/mysql";
+import { IVehicle } from "./../types/Vehicle.d";
 
 class Vehicles extends Model implements IModel {
   private name: string = "Vehicles";
@@ -11,7 +12,7 @@ class Vehicles extends Model implements IModel {
   async migrate() {
     const column: ColumnDefinition[] = [
       {
-        name: "VehicleId",
+        name: "id",
         type: MYSQL_CONSTANTS.TYPE.INT,
         unique: true,
         autoIncrement: true,
@@ -20,21 +21,13 @@ class Vehicles extends Model implements IModel {
         unsigned: true,
       },
       {
-        name: "type",
-        type: MYSQL_CONSTANTS.TYPE.VARCHAR50,
-      },
-      {
         name: "licensePlate",
         type: MYSQL_CONSTANTS.TYPE.TEXT,
       },
       {
         name: "vehiclePriceId",
         type: MYSQL_CONSTANTS.TYPE.INT,
-        foreignKey: { table: "VehiclePrices", column: "vehiclePriceId" },
-      },
-      {
-        name: "secretKey",
-        type: MYSQL_CONSTANTS.TYPE.TEXT,
+        foreignKey: { table: "VehiclePrices", column: "id" },
       },
       {
         name: "prepaidAmount",
@@ -56,6 +49,10 @@ class Vehicles extends Model implements IModel {
         name: "totalAmount",
         type: MYSQL_CONSTANTS.TYPE.DOUBLE,
       },
+      {
+        name: "lastUpdated",
+        type: MYSQL_CONSTANTS.TYPE.BIGINT,
+      },
     ];
 
     return await this.createTable(this.name, column);
@@ -64,6 +61,36 @@ class Vehicles extends Model implements IModel {
   getAll(name: string): Promise<any[]> {
     const list = new Mysql().getAll(name);
     return list;
+  }
+
+  async store(
+    {
+      extraAmount = 0,
+      totalAmount = 0,
+      licensePlate,
+      prepaidAmount = 0,
+      vehiclePriceId,
+    }: IVehicle,
+    getNew = false
+  ) {
+    const result = await new Mysql().store(
+      this.name,
+      {
+        extraAmount,
+        totalAmount,
+        licensePlate,
+        prepaidAmount,
+        vehiclePriceId,
+      },
+      getNew
+    );
+
+    return result;
+  }
+
+  async update(id: number, data: any) {
+    const result = await new Mysql().updateRecordById(id, data, this.name);
+    return result;
   }
 }
 

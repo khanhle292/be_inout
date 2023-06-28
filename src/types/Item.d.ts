@@ -1,12 +1,12 @@
 export interface IItem {
-  itemId: number;
+  id: number;
   merchantId: number;
-  agentId: string;
-  entryTime: string;
-  exitTime: string;
+  secretKey: string;
+  entryTime: number;
+  exitTime: number;
   status: IItemStatus;
   componentId: number;
-  componentType: number;
+  componentType: string;
 }
 
 export type IItemStatus = "CHECKED_IN" | "CHECKED_OUT";

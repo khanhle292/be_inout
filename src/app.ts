@@ -45,6 +45,7 @@ app.use(express.urlencoded({ limit: "50mb", extended: false }));
 app.use(cookieParser());
 app.use("/worker", worker);
 app.use("/api/merchant", merchant);
+app.use("/api/user", merchant);
 
 app.listen(3000, () => {
   console.log("Server is listening on port 3000");

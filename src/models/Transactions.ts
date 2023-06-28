@@ -10,7 +10,7 @@ class Transactions extends Model implements IModel {
   async migrate() {
     const column: ColumnDefinition[] = [
       {
-        name: "transactionId",
+        name: "id",
         type: MYSQL_CONSTANTS.TYPE.INT,
         unique: true,
         autoIncrement: true,
@@ -21,7 +21,7 @@ class Transactions extends Model implements IModel {
       {
         name: "itemId",
         type: MYSQL_CONSTANTS.TYPE.INT,
-        foreignKey: { table: "Items", column: "itemId" },
+        foreignKey: { table: "Items", column: "id" },
       },
       {
         name: "entryTime",
