@@ -28,17 +28,24 @@ class Mysql {
         });
       } catch (error) {
         console.log("[MYSQL]");
+        resolve([]);
       }
     });
   }
 
-  queryWithCondition(
-    field: string,
-    condition: ICondition,
-    value: string
-  ): Promise<any | null> {
+  queryWithCondition({
+    field,
+    condition,
+    value,
+    table,
+  }: {
+    field: string;
+    condition: ICondition;
+    value: string;
+    table: string;
+  }): Promise<any | null> {
     return new Promise((resolve, reject) => {
-      const sql = `SELECT * FROM your_table WHERE ${field} ${condition} ${value}`;
+      const sql = `SELECT * FROM ${table} WHERE ${field} ${condition} "${value}"`;
 
       this.connection.connect((error) => {
         if (error) {
@@ -50,7 +57,6 @@ class Mysql {
               reject(error);
               resolve(null);
             }
-
             resolve(results);
           });
         }

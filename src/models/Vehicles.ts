@@ -3,6 +3,7 @@ import MYSQL_CONSTANTS from "./../connections/mysql/constants";
 
 import type { IModel } from "./interfaces/Model";
 import type { ColumnDefinition } from "../connections/mysql/mysql";
+import Mysql from "./../connections/mysql";
 
 class Vehicles extends Model implements IModel {
   private name: string = "Vehicles";
@@ -58,6 +59,11 @@ class Vehicles extends Model implements IModel {
     ];
 
     return await this.createTable(this.name, column);
+  }
+
+  getAll(name: string): Promise<any[]> {
+    const list = new Mysql().getAll(name);
+    return list;
   }
 }
 

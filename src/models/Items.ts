@@ -1,4 +1,5 @@
 import Model from "./Model";
+import Mysql from "./../connections/mysql";
 import MYSQL_CONSTANTS from "./../connections/mysql/constants";
 
 import type { IModel } from "./interfaces/Model";
@@ -50,6 +51,16 @@ class Items extends Model implements IModel {
     ];
 
     await this.createTable(this.name, column);
+  }
+
+  getAll(name: string): Promise<any[]> {
+    const list = new Mysql().queryWithCondition({
+      field: "merchantId",
+      condition: "=",
+      value: name,
+      table: "Items",
+    });
+    return list;
   }
 }
 

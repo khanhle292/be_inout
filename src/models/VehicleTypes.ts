@@ -3,6 +3,7 @@ import MYSQL_CONSTANTS from "./../connections/mysql/constants";
 
 import type { IModel } from "./interfaces/Model";
 import type { ColumnDefinition } from "../connections/mysql/mysql";
+import Mysql from "./../connections/mysql";
 
 class VehicleTypes extends Model implements IModel {
   private name: string = "VehicleTypes";
