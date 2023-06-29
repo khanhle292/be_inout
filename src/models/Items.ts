@@ -5,6 +5,7 @@ import MYSQL_CONSTANTS from "./../connections/mysql/constants";
 import type { IModel } from "./interfaces/Model";
 import type { ColumnDefinition } from "../connections/mysql/mysql";
 import type { IItem, IItemStatus } from "./../types/Item";
+import { removeUndefinedObjects } from "./../utils/merchant";
 
 class Items extends Model implements IModel {
   private name: string = "Items";
@@ -71,6 +72,17 @@ class Items extends Model implements IModel {
     return list;
   }
 
+  async getAllByUser(secretKey: string): Promise<any[]> {
+    const sql = `SELECT * 
+    FROM Items 
+    JOIN Vehicles ON Vehicles.id = Items.componentId
+    JOIN VehiclePrices ON VehiclePrices.id = Vehicles.vehiclePriceId
+    JOIN VehicleTypes ON VehicleTypes.id = VehiclePrices.vehicleTypeId
+    WHERE Items.secretKey = '${secretKey}' AND Items.status = 'CHECKED_IN'`;
+    const list: any = await new Mysql().rawQuery(sql);
+    return list;
+  }
+
   async getAllDetail(id: string): Promise<any[]> {
     const sql = `SELECT * 
     FROM Items 
@@ -105,6 +117,14 @@ class Items extends Model implements IModel {
       },
       getNew
     );
+
+    return result;
+  }
+
+  async update(id: number, data: any) {
+    const payload = removeUndefinedObjects(data);
+    console.log("@@", payload);
+    const result = await new Mysql().updateRecordById(id, payload, "Items");
 
     return result;
   }

@@ -17,6 +17,7 @@ export const decodeLoginJWT = (token: string) => {
 
 export const encodeLoginJWT = (data: any) => {
   try {
+    delete data.token;
     const token = jwt.sign({ ...data }, privateKey, {
       algorithm: "HS256",
       expiresIn: "7d",

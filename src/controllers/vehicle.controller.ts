@@ -3,8 +3,7 @@ import Vehicles from "./../models/Vehicles";
 
 class VehicleController {
   update(req: Request, res: Response) {
-    const { id, data } = req.body;
-    new Vehicles().update(id, data).then((value) => {
+    new Vehicles().update(req.body).then((value) => {
       const payload = {
         status: true,
         message: "update",

@@ -8,6 +8,7 @@ import cookieParser from "cookie-parser";
 
 import worker from "./routes/Worker";
 import merchant from "./routes/Merchant";
+import user from "./routes/User";
 
 const app = express();
 app.use(bodyParser.raw());
@@ -45,7 +46,7 @@ app.use(express.urlencoded({ limit: "50mb", extended: false }));
 app.use(cookieParser());
 app.use("/worker", worker);
 app.use("/api/merchant", merchant);
-app.use("/api/user", merchant);
+app.use("/api/user", user);
 
 app.listen(3000, () => {
   console.log("Server is listening on port 3000");

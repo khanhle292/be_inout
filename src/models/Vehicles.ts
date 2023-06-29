@@ -88,9 +88,17 @@ class Vehicles extends Model implements IModel {
     return result;
   }
 
-  async update(id: number, data: any) {
-    const result = await new Mysql().updateRecordById(id, data, this.name);
-    return result;
+  async update(data: any) {
+    try {
+      const result = await new Mysql().rawQuery(`UPDATE Vehicles
+      JOIN Items ON Vehicles.id = Items.componentId
+      SET Vehicle.prepaidAmount = ${data?.prepaidAmount}
+      WHERE Items.secretKey = '${data?.secretKey}';`);
+      return result;
+    } catch (error: any) {
+      console.log("ERROR", error?.message);
+      return null;
+    }
   }
 }
 

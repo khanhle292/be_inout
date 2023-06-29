@@ -54,7 +54,7 @@ class Merchants extends Model implements IModel {
   }
 
   login(username: string, password: string) {
-    return new Promise<IMerchantInfo | null>((resolve) => {
+    return new Promise<IMerchantInfo | null | string>((resolve) => {
       try {
         new Mysql()
           .queryWithCondition({
@@ -69,6 +69,40 @@ class Merchants extends Model implements IModel {
                 resolve(value[0]);
               }
             }
+            resolve("Wrong username or password");
+          });
+      } catch (error) {
+        console.log("[ERROR][MERCHANT][LOGIN]", error);
+        resolve(null);
+      }
+    });
+  }
+
+  register({
+    merchantUsername,
+    merchantName,
+    merchantPasswordHash,
+    merchantAddress,
+    merchantConfig,
+  }: {
+    merchantUsername: string;
+    merchantName: string;
+    merchantPasswordHash: string;
+    merchantAddress: string;
+    merchantConfig: string;
+  }) {
+    return new Promise<any>((resolve) => {
+      try {
+        new Mysql()
+          .store("Merchants", {
+            merchantUsername,
+            merchantName,
+            merchantPasswordHash,
+            merchantAddress,
+            merchantConfig,
+          })
+          .then((value) => {
+            resolve(value);
           });
       } catch (error) {
         console.log("[ERROR][MERCHANT][LOGIN]", error);

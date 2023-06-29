@@ -6,6 +6,9 @@ import Vehicles from "./../controllers/vehicle.controller";
 
 let router = express.Router();
 
-router.route("/vehicles").put(Vehicles.update as any);
+router
+  .route("/vehicles")
+  .post(Item.getAllByUser as any)
+  .put(Vehicles.update as any);
 
 export default router;

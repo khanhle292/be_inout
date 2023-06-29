@@ -29,7 +29,7 @@ class Images extends Model implements IModel {
       },
       {
         name: "url",
-        type: MYSQL_CONSTANTS.TYPE.TEXT,
+        type: "LONGTEXT" as any,
       },
       {
         name: "createdDate",
