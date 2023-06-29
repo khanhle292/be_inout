@@ -8,7 +8,6 @@ import Mysql from "./../connections/mysql";
 import { getKeyAndDataFromConvertedData } from "./../utils/secrectKey";
 import { calculator } from "./../utils/merchant";
 import Transactions from "./../models/Transactions";
-import Mysql from "./../connections/mysql/index";
 
 class MerchantController {
   index(req: Request, res: Response) {
