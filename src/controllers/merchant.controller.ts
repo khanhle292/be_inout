@@ -8,6 +8,7 @@ import Mysql from "./../connections/mysql";
 import { getKeyAndDataFromConvertedData } from "./../utils/secrectKey";
 import { calculator } from "./../utils/merchant";
 import Transactions from "./../models/Transactions";
+import Mysql from "./../connections/mysql/index";
 
 class MerchantController {
   index(req: Request, res: Response) {
@@ -133,52 +134,59 @@ class MerchantController {
         secretKey,
       } = req.body;
 
-      const vehicle: any = await new Vehicles().store(
-        {
-          id: 0,
-          licensePlate,
-          vehiclePriceId,
-        },
-        true
-      );
+      const count = await new Mysql().rawQuery(`SELECT COUNT(*) AS recordCount
+      FROM Items
+      WHERE secretKey = '${secretKey}';`);
 
-      if (vehicle) {
-        const { id } = vehicle;
-        if (id) {
-          const item: any = await new Items().store(
-            {
-              id: 0,
-              merchantId: jwtTokenData?.id,
-              entryTime,
-              secretKey,
-              exitTime: 0,
-              status: "CHECKED_IN",
-              componentId: id,
-              componentType: "Vehicles",
-            },
-            true
-          );
+      if (!count) {
+        const vehicle: any = await new Vehicles().store(
+          {
+            id: 0,
+            licensePlate,
+            vehiclePriceId,
+          },
+          true
+        );
 
-          if (item) {
-            const payloadImages = {
-              url,
-              componentId: item?.id,
-              componentType: "Items",
-              createdDate: Date.now(),
-            };
-            if (!Array.isArray(url)) {
-              payloadImages.url = [url];
+        if (vehicle) {
+          const { id } = vehicle;
+          if (id) {
+            const item: any = await new Items().store(
+              {
+                id: 0,
+                merchantId: jwtTokenData?.id,
+                entryTime,
+                secretKey,
+                exitTime: 0,
+                status: "CHECKED_IN",
+                componentId: id,
+                componentType: "Vehicles",
+              },
+              true
+            );
+
+            if (item) {
+              const payloadImages = {
+                url,
+                componentId: item?.id,
+                componentType: "Items",
+                createdDate: Date.now(),
+              };
+              if (!Array.isArray(url)) {
+                payloadImages.url = [url];
+              }
+              const value = await new Images().store(payloadImages);
+              res.send({
+                status: true,
+                message: "checkin",
+                data: value,
+              });
+              return;
             }
-            const value = await new Images().store(payloadImages);
-            res.send({
-              status: true,
-              message: "checkin",
-              data: value,
-            });
-            return;
           }
         }
       }
+
       res.send({ status: false, message: "checkin false", data: null });
     } catch (error: any) {
       console.log("[ERROR][CHECK_IN]", error?.message);
