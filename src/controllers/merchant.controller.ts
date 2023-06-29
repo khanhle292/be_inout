@@ -133,11 +133,16 @@ class MerchantController {
         secretKey,
       } = req.body;
 
-      const count = await new Mysql().rawQuery(`SELECT COUNT(*) AS recordCount
+      const count: any = await new Mysql()
+        .rawQuery(`SELECT COUNT(*) AS recordCount
       FROM Items
       WHERE secretKey = '${secretKey}';`);
 
-      if (!count) {
+      console.log("@@@@", count);
+
+      const { recordCount } = count[0];
+
+      if (!recordCount) {
         const vehicle: any = await new Vehicles().store(
           {
             id: 0,
@@ -186,7 +191,11 @@ class MerchantController {
         }
       }
 
-      res.send({ status: false, message: "checkin false", data: null });
+      res.send({
+        status: false,
+        message: "checkin false",
+        data: "Vehicle already exist!",
+      });
     } catch (error: any) {
       console.log("[ERROR][CHECK_IN]", error?.message);
       res.send({
@@ -210,7 +219,6 @@ class MerchantController {
       if (isCheckin) {
         const totalPay = calculator(isCheckin);
         const { prepaidAmount, extraAmount } = isCheckin;
-        console.log("@@@@@", prepaidAmount + extraAmount);
 
         if (totalPay === prepaidAmount + extraAmount) {
           const crre = Date.now();
